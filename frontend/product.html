@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechStore - Product Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">🚀 TechStore</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li>
+          <a href="cart.html" class="cart-icon">
+            Cart <span id="cart-badge">0</span>
+          </a>
+        </li>
+        <li id="auth-link"><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <a href="index.html" class="btn btn-secondary mb-2">Go Back</a>
+    <div id="message-container"></div>
+    <div id="product-container" class="product-details d-none">
+      <div class="product-image">
+        <img id="p-img" src="" alt="Product">
+      </div>
+      <div class="product-info">
+        <h1 id="p-name"></h1>
+        <div class="price" id="p-price"></div>
+        <p class="mb-2" id="p-desc"></p>
+        
+        <div class="list-group">
+          <div class="list-group-item">
+            <span>Status:</span>
+            <span id="p-status"></span>
+          </div>
+          <div class="list-group-item" id="qty-container">
+            <span>Qty:</span>
+            <select id="p-qty" class="form-control" style="width: auto; padding: 0.25rem;">
+            </select>
+          </div>
+        </div>
+        
+        <button id="add-to-cart-btn" class="btn btn-block">Add to Cart</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      const msgDiv = document.getElementById('message-container');
+      const productContainer = document.getElementById('product-container');
+      const qtyContainer = document.getElementById('qty-container');
+      
+      let product = null;
+
+      try {
+        product = await apiRequest(`/products/${productId}`);
+        
+        document.getElementById('p-img').src = product.image;
+        document.getElementById('p-name').textContent = product.name;
+        document.getElementById('p-price').textContent = `$${product.price.toFixed(2)}`;
+        document.getElementById('p-desc').textContent = product.description;
+        
+        const inStock = product.countInStock > 0;
+        document.getElementById('p-status').textContent = inStock ? 'In Stock' : 'Out of Stock';
+        
+        if (inStock) {
+          const qtySelect = document.getElementById('p-qty');
+          for (let i = 1; i <= Math.min(product.countInStock, 10); i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            qtySelect.appendChild(option);
+          }
+        } else {
+          qtyContainer.classList.add('d-none');
+          document.getElementById('add-to-cart-btn').disabled = true;
+          document.getElementById('add-to-cart-btn').classList.add('btn-secondary');
+        }
+        
+        productContainer.classList.remove('d-none');
+      } catch (error) {
+        msgDiv.innerHTML = `<div class="alert alert-danger">Failed to load product details</div>`;
+      }
+
+      document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+        if (!product) return;
+        const qty = Number(document.getElementById('p-qty').value) || 1;
+        addToCart({
+          product: product._id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          countInStock: product.countInStock,
+          qty
+        });
+        window.location.href = 'cart.html';
+      });
+    });
+  </script>
+</body>
+</html>

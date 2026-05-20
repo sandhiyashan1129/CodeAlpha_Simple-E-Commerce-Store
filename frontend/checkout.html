@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechStore - Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">🚀 TechStore</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li>
+          <a href="cart.html" class="cart-icon">
+            Cart <span id="cart-badge">0</span>
+          </a>
+        </li>
+        <li id="auth-link"><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="form-container" style="max-width: 600px;">
+      <h2 class="mb-2 text-center">Shipping & Checkout</h2>
+      <div id="checkout-message"></div>
+      <form id="checkout-form">
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" id="address" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="city">City</label>
+          <input type="text" id="city" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="postalCode">Postal Code</label>
+          <input type="text" id="postalCode" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="country">Country</label>
+          <input type="text" id="country" class="form-control" required>
+        </div>
+        
+        <div class="list-group mt-2">
+          <div class="list-group-item">
+            <strong>Total Amount:</strong>
+            <strong id="order-total" style="color: var(--accent-color); font-size: 1.25rem;">$0.00</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-block mt-2">Place Order</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userInfo = getUserInfo();
+      if (!userInfo) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const cart = getCart();
+      if (cart.length === 0) {
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+      document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+    });
+
+    document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const shippingAddress = {
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        postalCode: document.getElementById('postalCode').value,
+        country: document.getElementById('country').value,
+      };
+
+      const cart = getCart();
+      const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+      const userInfo = getUserInfo();
+
+      try {
+        const orderData = {
+          orderItems: cart,
+          shippingAddress,
+          totalPrice: total
+        };
+
+        const res = await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userInfo.token}`
+          },
+          body: JSON.stringify(orderData)
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to place order');
+        }
+
+        clearCart();
+        document.getElementById('checkout-message').innerHTML = `<div class="alert alert-success">Order placed successfully! Order ID: ${data._id}</div>`;
+        document.getElementById('checkout-form').style.display = 'none';
+        
+      } catch (error) {
+        document.getElementById('checkout-message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

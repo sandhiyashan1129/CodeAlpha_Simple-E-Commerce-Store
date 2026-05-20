@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechStore - Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">🚀 TechStore</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li>
+          <a href="cart.html" class="cart-icon">
+            Cart <span id="cart-badge">0</span>
+          </a>
+        </li>
+        <li id="auth-link"><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="form-container">
+      <h2 class="mb-2 text-center">Sign Up</h2>
+      <div id="register-message"></div>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" class="form-control" placeholder="Enter name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" required>
+        </div>
+        <button type="submit" class="btn btn-block">Register</button>
+      </form>
+      <div class="mt-1 text-center">
+        Have an Account? <a href="login.html">Login</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const msgDiv = document.getElementById('register-message');
+      
+      if (password !== confirmPassword) {
+        msgDiv.innerHTML = `<div class="alert alert-danger">Passwords do not match</div>`;
+        return;
+      }
+
+      try {
+        const data = await apiRequest('/users', 'POST', { name, email, password });
+        localStorage.setItem('userInfo', JSON.stringify(data));
+        window.location.href = 'index.html';
+      } catch (error) {
+        msgDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechStore - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">🚀 TechStore</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li>
+          <a href="cart.html" class="cart-icon">
+            Cart <span id="cart-badge">0</span>
+          </a>
+        </li>
+        <li id="auth-link"><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <h1 class="mb-2 text-center">Latest Products</h1>
+    <div id="message-container"></div>
+    <div class="grid" id="products-grid">
+      <!-- Products will be injected here by JS -->
+      <div class="text-center">Loading products...</div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
